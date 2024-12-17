@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_sortable import sortable
+from streamlit_dnd import dnd_container, dnd_item
 
 # Initialize session state for columns
 if 'pipeline' not in st.session_state:
@@ -45,20 +45,14 @@ col1, col2, col3, col4 = st.columns(4)
 for i, col in enumerate(columns):
     with [col1, col2, col3, col4][i]:
         st.write(f"### {col}")
-        items = [
-            f"{c['candidate_name']} ({c['client']}, {c['vacancy']}) - Fee: £{c['fee']}"
-            for c in st.session_state['pipeline'][col]
-        ]
-        updated_items = sortable(items, key=f"sortable_{col}")
         
-        # Update session state based on drag-and-drop changes
-        if updated_items != items:
-            updated_candidates = []
-            for item in updated_items:
-                name = item.split(" ")[0]
-                candidate_data = next(c for c in st.session_state['pipeline'][col] if c["candidate_name"] == name)
-                updated_candidates.append(candidate_data)
-            st.session_state['pipeline'][col] = updated_candidates
+        # Drag-and-Drop Container
+        with dnd_container(key=f"dnd_{col}"):
+            for candidate in st.session_state['pipeline'][col]:
+                dnd_item(
+                    label=f"{candidate['candidate_name']} ({candidate['client']}, {candidate['vacancy']}) - Fee: £{candidate['fee']}",
+                    key=f"item_{candidate['candidate_name']}"
+                )
         
         # Calculate totals
         totals[col] += sum(c["fee"] for c in st.session_state['pipeline'][col])
