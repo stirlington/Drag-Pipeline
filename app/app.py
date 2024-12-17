@@ -48,10 +48,10 @@ for i, col in enumerate(columns):
         
         # Drag-and-Drop Container
         with dnd_container(key=f"dnd_{col}"):
-            for candidate in st.session_state['pipeline'][col]:
+            for j, candidate in enumerate(st.session_state['pipeline'][col]):
                 dnd_item(
                     label=f"{candidate['candidate_name']} ({candidate['client']}, {candidate['vacancy']}) - Fee: £{candidate['fee']}",
-                    key=f"item_{candidate['candidate_name']}"
+                    key=f"item_{candidate['candidate_name']}_{j}"  # Unique key
                 )
         
         # Calculate totals
@@ -64,14 +64,16 @@ for col, total in totals.items():
 
 # Track invoices and payments
 st.subheader("Invoice and Payment Tracker")
-invoice_tracker = {}
-for candidate in st.session_state['pipeline']["Invoiced/Placed"]:
-    month = st.selectbox(
-        f"Expected Invoice Month for {candidate['candidate_name']} ({candidate['client']})",
-        ["January", "February", "March", "April", "May", "June",
-         "July", "August", "September", "October", "November", "December"],
-        key=f"invoice_{candidate['candidate_name']}"
-    )
-    invoice_tracker[candidate["candidate_name"]] = month
-
-st.write(invoice_tracker)
+if st.session_state['pipeline']["Invoiced/Placed"]:
+    invoice_tracker = {}
+    for candidate in st.session_state['pipeline']["Invoiced/Placed"]:
+        month = st.selectbox(
+            f"Expected Invoice Month for {candidate['candidate_name']} ({candidate['client']})",
+            ["January", "February", "March", "April", "May", "June",
+             "July", "August", "September", "October", "November", "December"],
+            key=f"invoice_{candidate['candidate_name']}"
+        )
+        invoice_tracker[candidate["candidate_name"]] = month
+    st.write(invoice_tracker)
+else:
+    st.write("No candidates in 'Invoiced/Placed' column.")
